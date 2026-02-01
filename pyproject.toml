@@ -1,0 +1,35 @@
+[project]
+name = "gargoyle"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "==3.13.5"
+dependencies = [
+    "langchain==1.2.7",
+    "langchain-openai==1.1.7",
+]
+
+[dependency-groups]
+dev = [
+    "ruff==0.14.14",
+    "pyright==1.1.408"
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "ALL"
+]
+ignore = [
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D211", # No blank line before class docstring
+    "D212", # Multi-line docstring summary not separated with blank line
+]
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
