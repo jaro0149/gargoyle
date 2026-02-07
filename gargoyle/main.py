@@ -3,7 +3,7 @@ from pydantic import SecretStr
 
 from gargoyle.graph.mind_map_config import MindMapConfig
 from gargoyle.graph.mind_map_context import MindMapContext
-from gargoyle.graph.mind_map_graph_builder import build_mind_map_creation_graph
+from gargoyle.graph.mind_map_graph_builder import MindMapGraphBuilder
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 
 
@@ -14,10 +14,8 @@ def main():
         streaming=True,
         # max_tokens=1024
     )
-
-    graph = build_mind_map_creation_graph(
-        llm=llm
-    )
+    mind_map_graph_builder = MindMapGraphBuilder(llm)
+    graph = mind_map_graph_builder.build_mind_map_creation_graph()
 
     ospf_text_1 = """
     Open Shortest Path First (OSPF) is a routing protocol for Internet Protocol (IP) networks. 
