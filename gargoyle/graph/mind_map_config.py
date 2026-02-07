@@ -49,7 +49,7 @@ class KeywordsMergingConfig(BaseModel):
     """
 
 
-class Config(BaseModel):
+class MindMapConfig(BaseModel):
     """
     Global configuration for the Gargoyle application.
     """

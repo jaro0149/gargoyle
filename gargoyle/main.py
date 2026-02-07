@@ -1,7 +1,8 @@
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
-from gargoyle.graph.mind_map_config import Config
+from gargoyle.graph.mind_map_config import MindMapConfig
+from gargoyle.graph.mind_map_context import MindMapContext
 from gargoyle.graph.mind_map_graph_builder import build_mind_map_creation_graph
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 
@@ -14,9 +15,7 @@ def main():
         # max_tokens=1024
     )
 
-    config = Config()
     graph = build_mind_map_creation_graph(
-        config=config,
         llm=llm
     )
 
@@ -34,7 +33,13 @@ def main():
     in IPv6, area and router Identifications are still based on 32-bit numbers. 
     """
 
-    res = graph.invoke(AggregatedKeywordsState(input_texts=[ospf_text_1, ospf_text_2]))
+    context = MindMapContext(
+        config=MindMapConfig()
+    )
+    res = graph.invoke(
+        AggregatedKeywordsState(input_texts=[ospf_text_1, ospf_text_2]),
+        context=context
+    )
     print(res)
 
 

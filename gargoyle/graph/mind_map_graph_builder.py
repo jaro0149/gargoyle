@@ -4,9 +4,8 @@ from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from gargoyle.edges.fan_out_keywords_extraction import fan_out_keywords_extraction
-from gargoyle.edges.fan_out_keywords_merging import FanOutKeywordsMerging
-from gargoyle.edges.routing_after_keywords_extraction import RoutingAfterKeywordsExtraction
-from gargoyle.graph.mind_map_config import Config
+from gargoyle.edges.fan_out_keywords_merging import fan_out_merging_of_keywords
+from gargoyle.edges.routing_after_keywords_extraction import route_after_keywords_extraction
 from gargoyle.graph.node_identifiers import (
     ID_BUILD_KEYWORDS_HIERARCHIES,
     ID_CREATE_HIERARCHY,
@@ -18,26 +17,24 @@ from gargoyle.graph.node_identifiers import (
 from gargoyle.nodes.keywords_extractor import KeywordsExtractor
 from gargoyle.nodes.keywords_hierarchy_builder import KeywordsHierarchyBuilder
 from gargoyle.nodes.merge_keyword_hierarchies import MergeKeywordHierarchies
-from gargoyle.nodes.prepare_keywords_before_merging import PrepareKeywordsBeforeMerging
+from gargoyle.nodes.prepare_keywords_before_merging import prepare_keywords_before_merging
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 from gargoyle.state.keywords_state import KeywordsState
 
 
-def build_mind_map_creation_graph(config: Config, llm: BaseChatModel) -> CompiledStateGraph:
+def build_mind_map_creation_graph(llm: BaseChatModel) -> CompiledStateGraph:
     key_extraction_graph = _build_keywords_extraction_graph(
-        config=config,
         llm=llm
     )
     return _build_aggregation_graph(
-        config=config,
         llm=llm,
         key_extraction_graph=key_extraction_graph
     )
 
 
-def _build_keywords_extraction_graph(config: Config, llm: BaseChatModel) -> CompiledStateGraph:
-    extractor = KeywordsExtractor(model=llm, config=config.keywords_extractor)
-    hierarchy_builder = KeywordsHierarchyBuilder(model=llm, config=config.keywords_hierarchy)
+def _build_keywords_extraction_graph(llm: BaseChatModel) -> CompiledStateGraph:
+    extractor = KeywordsExtractor(model=llm)
+    hierarchy_builder = KeywordsHierarchyBuilder(model=llm)
 
     graph_builder = StateGraph(KeywordsState)
     graph_builder.add_node(node=ID_EXTRACT_KEYWORDS, action=extractor)
@@ -50,18 +47,12 @@ def _build_keywords_extraction_graph(config: Config, llm: BaseChatModel) -> Comp
 
 
 def _build_aggregation_graph(
-        config: Config,
         llm: BaseChatModel,
         key_extraction_graph: CompiledStateGraph
 ) -> CompiledStateGraph:
     merge_hierarchies = MergeKeywordHierarchies(
-        model=llm,
-        hierarchy_config=config.keywords_hierarchy,
-        merge_config=config.merge_keywords
+        model=llm
     )
-    prepare_keywords_before_merging = PrepareKeywordsBeforeMerging(config=config.merge_keywords)
-    fan_out_keywords_merging = FanOutKeywordsMerging(config=config.merge_keywords)
-    routing_after_keywords_extraction = RoutingAfterKeywordsExtraction(config=config.merge_keywords)
 
     graph_builder = StateGraph(AggregatedKeywordsState)
     graph_builder.add_node(node=ID_BUILD_KEYWORDS_HIERARCHIES, action=key_extraction_graph)
@@ -77,12 +68,12 @@ def _build_aggregation_graph(
     graph_builder.add_edge(start_key=ID_BUILD_KEYWORDS_HIERARCHIES, end_key=ID_JOIN_KEYWORDS_HIERARCHIES)
     graph_builder.add_conditional_edges(
         source=ID_JOIN_KEYWORDS_HIERARCHIES,
-        path=routing_after_keywords_extraction,
+        path=route_after_keywords_extraction,
         path_map=[ID_PREPARE_KEYWORDS_BEFORE_MERGING, END]
     )
     graph_builder.add_conditional_edges(
         source=ID_PREPARE_KEYWORDS_BEFORE_MERGING,
-        path=fan_out_keywords_merging,
+        path=fan_out_merging_of_keywords,
         path_map=[ID_MERGE_HIERARCHIES, END]
     )
     graph_builder.add_edge(start_key=ID_MERGE_HIERARCHIES, end_key=ID_PREPARE_KEYWORDS_BEFORE_MERGING)
