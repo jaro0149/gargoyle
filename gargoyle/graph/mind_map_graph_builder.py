@@ -5,6 +5,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from gargoyle.edges.fan_out_keywords_extraction import fan_out_keywords_extraction
 from gargoyle.edges.fan_out_keywords_merging import FanOutKeywordsMerging
+from gargoyle.edges.routing_after_keywords_extraction import RoutingAfterKeywordsExtraction
 from gargoyle.graph.mind_map_config import Config
 from gargoyle.nodes.keywords_extractor import KeywordsExtractor
 from gargoyle.nodes.keywords_hierarchy_builder import KeywordsHierarchyBuilder
@@ -52,9 +53,11 @@ def _build_aggregation_graph(
     )
     prepare_keywords_before_merging = PrepareKeywordsBeforeMerging(config=config.merge_keywords)
     fan_out_keywords_merging = FanOutKeywordsMerging(config=config.merge_keywords)
+    routing_after_keywords_extraction = RoutingAfterKeywordsExtraction(config=config.merge_keywords)
 
     graph_builder = StateGraph(AggregatedKeywordsState)
     graph_builder.add_node(node="build_keywords_hierarchies", action=key_extraction_graph)
+    graph_builder.add_node(node="join_keywords_hierarchies", action=lambda state: state)
     graph_builder.add_node(node="prepare_keywords_before_merging", action=prepare_keywords_before_merging)
     graph_builder.add_node(node="merge_hierarchies", action=merge_hierarchies)
 
@@ -63,7 +66,12 @@ def _build_aggregation_graph(
         path=fan_out_keywords_extraction,
         path_map=["build_keywords_hierarchies", END]
     )
-    graph_builder.add_edge(start_key="build_keywords_hierarchies", end_key="prepare_keywords_before_merging")
+    graph_builder.add_edge(start_key="build_keywords_hierarchies", end_key="join_keywords_hierarchies")
+    graph_builder.add_conditional_edges(
+        source="join_keywords_hierarchies",
+        path=routing_after_keywords_extraction,
+        path_map=["prepare_keywords_before_merging", END]
+    )
     graph_builder.add_conditional_edges(
         source="prepare_keywords_before_merging",
         path=fan_out_keywords_merging,
