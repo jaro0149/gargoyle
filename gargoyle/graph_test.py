@@ -58,7 +58,7 @@ def main() -> None:
         path=fan_out_keywords_merging,
         path_map=["merge_hierarchies", END]
     )
-    graph_builder.add_edge(start_key="merge_hierarchies", end_key=END)
+    graph_builder.add_edge(start_key="merge_hierarchies", end_key="prepare_keywords_before_merging")
     graph = graph_builder.compile()
 
     ospf_text_1 = """
