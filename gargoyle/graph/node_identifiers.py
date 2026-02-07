@@ -1,0 +1,6 @@
+ID_EXTRACT_KEYWORDS = "extract_keywords"
+ID_CREATE_HIERARCHY = "create_hierarchy"
+ID_BUILD_KEYWORDS_HIERARCHIES = "build_keywords_hierarchies"
+ID_JOIN_KEYWORDS_HIERARCHIES = "join_keywords_hierarchies"
+ID_PREPARE_KEYWORDS_BEFORE_MERGING = "prepare_keywords_before_merging"
+ID_MERGE_HIERARCHIES = "merge_hierarchies"

@@ -2,6 +2,7 @@ from langgraph.constants import END
 from langgraph.types import Send
 
 from gargoyle.graph.mind_map_config import KeywordsMergingConfig
+from gargoyle.graph.node_identifiers import ID_MERGE_HIERARCHIES
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 from gargoyle.state.keywords_state import RootKeywords
 
@@ -22,7 +23,7 @@ class FanOutKeywordsMerging:
             chunk = state.keyword_hierarchies[hierarchy_idx:hierarchy_idx + self.config.squash_root_keywords]
             buckets.append(
                 Send(
-                    "merge_hierarchies",
+                    ID_MERGE_HIERARCHIES,
                     RootKeywords(keyword_hierarchies=chunk)
                 )
             )
