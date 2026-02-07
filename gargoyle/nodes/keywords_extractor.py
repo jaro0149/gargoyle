@@ -3,8 +3,8 @@ from typing import cast
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import SystemMessage, HumanMessage
 
+from gargoyle.nodes.enforcing_utils import trim_keywords
 from gargoyle.nodes.promt_templates import KEYWORDS_EXTRACTION_PROMPT
-from gargoyle.nodes.utils import trim_keywords
 from gargoyle.settings import KeywordExtractorSettings
 from gargoyle.state.keywords_state import Keywords, KeywordsState
 

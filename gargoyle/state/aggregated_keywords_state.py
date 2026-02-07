@@ -1,6 +1,7 @@
 import operator
 from typing import Annotated
 
+from langgraph.types import Overwrite
 from pydantic import BaseModel, ConfigDict
 
 from gargoyle.state.keywords_state import KeywordsHierarchy
@@ -32,7 +33,12 @@ class AggregatedKeywordsState(BaseModel):
     """
     List of keyword hierarchies from all input texts.
     """
-    merged_keywords_hierarchies: Annotated[list[KeywordsHierarchy], operator.add] = []
+    merged_keywords_hierarchies: Annotated[list[KeywordsHierarchy], operator.add] | Overwrite = []
     """
     Merged keyword hierarchies from all input texts.
+    This list is automatically erased before the next merging iteration and built at the end of the actual iteration.
+    """
+    last_keywords_hierarchies: list[KeywordsHierarchy] = []
+    """
+    List of keyword hierarchies from the last iteration of the merging process.
     """

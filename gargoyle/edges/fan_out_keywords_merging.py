@@ -12,13 +12,13 @@ class FanOutKeywordsMerging:
         self.settings = settings
 
     def __call__(self, state: AggregatedKeywordsState) -> list[Send] | str:
-        if not state.keyword_hierarchies:
+        if not state.last_keywords_hierarchies:
             return END
-        if len(state.keyword_hierarchies) <= self.settings.max_root_keywords:
+        if len(state.last_keywords_hierarchies) <= self.settings.max_root_keywords:
             return END
 
         buckets: list[Send] = []
-        for hierarchy_idx in range(0, len(state.keyword_hierarchies), self.settings.squash_root_keywords):
+        for hierarchy_idx in range(0, len(state.last_keywords_hierarchies), self.settings.squash_root_keywords):
             chunk = state.keyword_hierarchies[hierarchy_idx:hierarchy_idx + self.settings.squash_root_keywords]
             buckets.append(
                 Send(

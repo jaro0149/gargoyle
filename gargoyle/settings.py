@@ -30,6 +30,10 @@ class KeywordsMergingSetting(BaseSettings):
     Settings for the keywords merging node.
     """
 
+    randomize_keywords: bool = True
+    """
+    Whether to randomize the order of root keywords before merging trees.
+    """
     max_root_keywords: int = 2
     """
     Maximum number of root keywords in the final merged structure.

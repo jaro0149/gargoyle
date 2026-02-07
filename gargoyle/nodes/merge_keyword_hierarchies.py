@@ -3,8 +3,8 @@ from typing import cast
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import SystemMessage, HumanMessage
 
+from gargoyle.nodes.enforcing_utils import enforce_max_depth
 from gargoyle.nodes.promt_templates import COMBINE_HIERARCHIES_PROMPT
-from gargoyle.nodes.utils import enforce_max_depth
 from gargoyle.settings import KeywordsHierarchySettings, KeywordsMergingSetting
 from gargoyle.state.aggregated_keywords_state import MergedKeywordsHierarchies
 from gargoyle.state.keywords_state import RootKeywords, KeywordsHierarchy

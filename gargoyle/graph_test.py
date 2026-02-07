@@ -1,12 +1,14 @@
 from langchain_openai import ChatOpenAI
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
+from pydantic import SecretStr
 
 from gargoyle.edges.fan_out_keywords_extraction import fan_out_keywords_extraction
 from gargoyle.edges.fan_out_keywords_merging import FanOutKeywordsMerging
 from gargoyle.nodes.keywords_extractor import KeywordsExtractor
 from gargoyle.nodes.keywords_hierarchy_builder import KeywordsHierarchyBuilder
 from gargoyle.nodes.merge_keyword_hierarchies import MergeKeywordHierarchies
+from gargoyle.nodes.prepare_keywords_before_merging import PrepareKeywordsBeforeMerging
 from gargoyle.settings import Settings
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 from gargoyle.state.keywords_state import KeywordsState
@@ -15,12 +17,10 @@ from gargoyle.state.keywords_state import KeywordsState
 def main() -> None:
     llm = ChatOpenAI(
         model="gpt-5-nano",
-        streaming=True
+        api_key=None,
+        streaming=True,
+        # max_tokens=1024
     )
-
-    def join(_: AggregatedKeywordsState) -> dict:
-        # No state change needed; the gating is in the conditional routing.
-        return {}
 
     settings = Settings()
     extractor = KeywordsExtractor(model=llm, settings=settings.keywords_extractor)
@@ -30,6 +30,7 @@ def main() -> None:
         hierarchy_settings=settings.keywords_hierarchy,
         merge_settings=settings.merge_keywords
     )
+    prepare_keywords_before_merging = PrepareKeywordsBeforeMerging(settings.merge_keywords)
     fan_out_keywords_merging = FanOutKeywordsMerging(settings=settings.merge_keywords)
 
     # Subgraph for processing a single text
@@ -44,16 +45,16 @@ def main() -> None:
     # Parent graph
     graph_builder = StateGraph(AggregatedKeywordsState)
     graph_builder.add_node(node="build_keywords_hierarchies", action=subgraph)
-    graph_builder.add_node(node="join", action=join)
+    graph_builder.add_node(node="prepare_keywords_before_merging", action=prepare_keywords_before_merging)
     graph_builder.add_node(node="merge_hierarchies", action=merge_hierarchies)
     graph_builder.add_conditional_edges(
         source=START,
         path=fan_out_keywords_extraction,
         path_map=["build_keywords_hierarchies", END]
     )
-    graph_builder.add_edge(start_key="build_keywords_hierarchies", end_key="join")
+    graph_builder.add_edge(start_key="build_keywords_hierarchies", end_key="prepare_keywords_before_merging")
     graph_builder.add_conditional_edges(
-        source="join",
+        source="prepare_keywords_before_merging",
         path=fan_out_keywords_merging,
         path_map=["merge_hierarchies", END]
     )
