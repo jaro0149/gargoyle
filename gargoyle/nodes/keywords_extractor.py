@@ -5,22 +5,22 @@ from langchain_core.messages import SystemMessage, HumanMessage
 
 from gargoyle.nodes.enforcing_utils import trim_keywords
 from gargoyle.nodes.promt_templates import KEYWORDS_EXTRACTION_PROMPT
-from gargoyle.settings import KeywordExtractorSettings
+from gargoyle.graph.mind_map_config import KeywordsExtractorConfig
 from gargoyle.state.keywords_state import Keywords, KeywordsState
 
 
 class KeywordsExtractor:
 
-    def __init__(self, model: BaseChatModel, settings: KeywordExtractorSettings) -> None:
+    def __init__(self, model: BaseChatModel, config: KeywordsExtractorConfig) -> None:
         self.struct_model = model.with_structured_output(schema=Keywords)
-        self.prompt = self._build_prompt(settings)
-        self.settings = settings
+        self.prompt = self._build_prompt(config)
+        self.config = config
 
     @staticmethod
-    def _build_prompt(settings: KeywordExtractorSettings) -> str:
+    def _build_prompt(config: KeywordsExtractorConfig) -> str:
         return KEYWORDS_EXTRACTION_PROMPT.format(
-            max_keywords=settings.max_keywords,
-            max_words_in_keyword=settings.max_words_in_keyword
+            max_keywords=config.max_keywords,
+            max_words_in_keyword=config.max_words_in_keyword
         )
 
     def __call__(self, state: KeywordsState) -> Keywords:
@@ -34,4 +34,4 @@ class KeywordsExtractor:
             ]
         )
         keywords = cast(Keywords, llm_response)
-        return trim_keywords(settings=self.settings, derived_keywords=keywords)
+        return trim_keywords(config=self.config, derived_keywords=keywords)

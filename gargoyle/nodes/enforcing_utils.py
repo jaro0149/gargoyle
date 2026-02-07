@@ -1,37 +1,37 @@
-from gargoyle.settings import KeywordsHierarchySettings, KeywordExtractorSettings
+from gargoyle.graph.mind_map_config import KeywordsHierarchyConfig, KeywordsExtractorConfig
 from gargoyle.state.keywords_state import KeywordsHierarchy, Keywords
 
 
-def enforce_max_depth(settings: KeywordsHierarchySettings, hierarchy: KeywordsHierarchy) -> KeywordsHierarchy:
+def enforce_max_depth(config: KeywordsHierarchyConfig, hierarchy: KeywordsHierarchy) -> KeywordsHierarchy:
     """
-    Enforces the maximum depth restriction on the given hierarchy based on the settings.
+    Enforces the maximum depth restriction on the given hierarchy based on the configuration.
 
     This function ensures that the hierarchy does not exceed the specified maximum
-    depth provided in the settings. It processes the hierarchy recursively and trims
+    depth provided in the config. It processes the hierarchy recursively and trims
     it to comply with the defined depth limitation.
 
-    :param settings: Configuration object defining the maximum depth.
+    :param config: Configuration object defining the maximum depth.
     :param hierarchy: The hierarchy to be processed and restricted by the maximum depth.
     :return: Hierarchy modified to conform to the maximum depth constraint.
     """
-    return _enforce_max_depth(max_depth=settings.max_depth, hierarchy=hierarchy, current_depth=1)
+    return _enforce_max_depth(max_depth=config.max_depth, hierarchy=hierarchy, current_depth=1)
 
 
-def trim_keywords(settings: KeywordExtractorSettings, derived_keywords: Keywords) -> Keywords:
+def trim_keywords(config: KeywordsExtractorConfig, derived_keywords: Keywords) -> Keywords:
     """
-    Trims the derived keywords based on the settings, limiting the number of keywords and the length of each keyword.
+    Trims the derived keywords based on the config, limiting the number of keywords and the length of each keyword.
 
-    :param settings: Configuration object defining the maximum keywords and words per keyword.
+    :param config: Configuration object defining the maximum keywords and words per keyword.
     :param derived_keywords: The keywords to be trimmed.
-    :return: Keywords with trimmed content according to the settings.
+    :return: Keywords with trimmed content according to the configuration.
     """
     if not derived_keywords.keywords:
         return derived_keywords
 
     trimmed_keywords = []
-    for kw in derived_keywords.keywords[:settings.max_keywords]:
+    for kw in derived_keywords.keywords[:config.max_keywords]:
         words = kw.split()
-        trimmed_kw = " ".join(words[:settings.max_words_in_keyword])
+        trimmed_kw = " ".join(words[:config.max_words_in_keyword])
         trimmed_keywords.append(trimmed_kw)
 
     return Keywords(keywords=trimmed_keywords)

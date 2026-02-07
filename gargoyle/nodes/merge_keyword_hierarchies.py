@@ -5,7 +5,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 
 from gargoyle.nodes.enforcing_utils import enforce_max_depth
 from gargoyle.nodes.promt_templates import COMBINE_HIERARCHIES_PROMPT
-from gargoyle.settings import KeywordsHierarchySettings, KeywordsMergingSetting
+from gargoyle.graph.mind_map_config import KeywordsHierarchyConfig, KeywordsMergingConfig
 from gargoyle.state.aggregated_keywords_state import MergedKeywordsHierarchies
 from gargoyle.state.keywords_state import RootKeywords, KeywordsHierarchy
 
@@ -15,19 +15,19 @@ class MergeKeywordHierarchies:
     def __init__(
             self,
             model: BaseChatModel,
-            hierarchy_settings: KeywordsHierarchySettings,
-            merge_settings: KeywordsMergingSetting
+            hierarchy_config: KeywordsHierarchyConfig,
+            merge_config: KeywordsMergingConfig
     ) -> None:
-        self.hierarchy_settings = hierarchy_settings
-        self.merge_settings = merge_settings
+        self.hierarchy_config = hierarchy_config
+        self.merge_config = merge_config
         self.struct_model = model.with_structured_output(schema=MergedKeywordsHierarchies)
-        self.prompt = self._build_prompt(hierarchy_settings, merge_settings)
+        self.prompt = self._build_prompt(hierarchy_config, merge_config)
 
     @staticmethod
-    def _build_prompt(hierarchy_settings: KeywordsHierarchySettings, merge_settings: KeywordsMergingSetting) -> str:
+    def _build_prompt(hierarchy_config: KeywordsHierarchyConfig, merge_config: KeywordsMergingConfig) -> str:
         return COMBINE_HIERARCHIES_PROMPT.format(
-            max_depth=hierarchy_settings.max_depth,
-            max_root_keywords=merge_settings.max_root_keywords
+            max_depth=hierarchy_config.max_depth,
+            max_root_keywords=merge_config.max_root_keywords
         )
 
     def __call__(self, state: RootKeywords) -> MergedKeywordsHierarchies:
@@ -55,9 +55,9 @@ class MergeKeywordHierarchies:
         if not root_keywords.merged_keywords_hierarchies:
             return root_keywords
 
-        trimmed_keywords = root_keywords.merged_keywords_hierarchies[:self.merge_settings.max_root_keywords]
+        trimmed_keywords = root_keywords.merged_keywords_hierarchies[:self.merge_config.max_root_keywords]
         polished_hierarchies: list[KeywordsHierarchy] = []
         for hierarchy in trimmed_keywords:
-            polished_hierarchy = enforce_max_depth(settings=self.hierarchy_settings, hierarchy=hierarchy)
+            polished_hierarchy = enforce_max_depth(config=self.hierarchy_config, hierarchy=hierarchy)
             polished_hierarchies.append(polished_hierarchy)
         return MergedKeywordsHierarchies(merged_keywords_hierarchies=polished_hierarchies)
