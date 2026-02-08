@@ -16,6 +16,7 @@ from gargoyle.graph.node_identifiers import (
     ID_MERGE_HIERARCHIES,
     ID_PREPARE_KEYWORDS_BEFORE_MERGING, ID_BUILD_MIND_MAP, ID_SPLIT_TEXT,
 )
+from gargoyle.llm.llm_factory import LLMFactory
 from gargoyle.nodes.input_text_splitter import split_text
 from gargoyle.nodes.keywords_extractor import KeywordsExtractor
 from gargoyle.nodes.keywords_hierarchy_builder import KeywordsHierarchyBuilder
@@ -23,6 +24,7 @@ from gargoyle.nodes.keywords_single_step_builder import KeywordsSingleStepBuilde
 from gargoyle.nodes.merge_keyword_hierarchies import MergeKeywordHierarchies
 from gargoyle.nodes.mind_map_builder import build_mind_map
 from gargoyle.nodes.prepare_keywords_before_merging import prepare_keywords_before_merging
+from gargoyle.settings import settings
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 from gargoyle.state.keywords_state import KeywordsState
 
@@ -37,13 +39,11 @@ class MindMapGraphBuilder:
     it extensible for various text-processing tasks.
     """
 
-    def __init__(self, llm: BaseChatModel) -> None:
+    def __init__(self) -> None:
         """
-        Initializes an instance of the class with a given BaseChatModel.
-
-        :param llm: The language model to be used for this instance.
+        Initializes an instance of the class.
         """
-        self.llm = llm
+        self.llm_factory = LLMFactory()
 
     def build_mind_map_creation_graph(self) -> CompiledStateGraph:
         """
@@ -59,10 +59,17 @@ class MindMapGraphBuilder:
             key_extraction_graph=key_extraction_graph
         )
 
+
     def _build_keywords_extraction_graph(self) -> CompiledStateGraph:
-        extractor = KeywordsExtractor(model=self.llm)
-        hierarchy_builder = KeywordsHierarchyBuilder(model=self.llm)
-        single_step_builder = KeywordsSingleStepBuilder(model=self.llm)
+        extractor = KeywordsExtractor(
+            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_extractor_id)
+        )
+        hierarchy_builder = KeywordsHierarchyBuilder(
+            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_hierarchy_builder_id)
+        )
+        single_step_builder = KeywordsSingleStepBuilder(
+            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_single_step_builder_id)
+        )
 
         graph_builder = StateGraph(KeywordsState)
         graph_builder.add_node(node=ID_EXTRACT_KEYWORDS, action=extractor)
@@ -84,7 +91,7 @@ class MindMapGraphBuilder:
             key_extraction_graph: CompiledStateGraph
     ) -> CompiledStateGraph:
         merge_hierarchies = MergeKeywordHierarchies(
-            model=self.llm
+            model=self.llm_factory.get_llm(settings.graph_nodes.merge_keyword_hierarchies_id)
         )
 
         graph_builder = StateGraph(AggregatedKeywordsState)

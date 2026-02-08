@@ -1,6 +1,3 @@
-from langchain_openai import ChatOpenAI
-from pydantic import SecretStr
-
 from gargoyle.graph.mind_map_config import MindMapConfig
 from gargoyle.graph.mind_map_context import MindMapContext
 from gargoyle.graph.mind_map_graph_builder import MindMapGraphBuilder
@@ -8,13 +5,7 @@ from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 
 
 def main():
-    llm = ChatOpenAI(
-        model="gpt-5-nano",
-        api_key=None,
-        streaming=True,
-        # max_tokens=1024
-    )
-    mind_map_graph_builder = MindMapGraphBuilder(llm)
+    mind_map_graph_builder = MindMapGraphBuilder()
     graph = mind_map_graph_builder.build_mind_map_creation_graph()
 
     ospf_text = """
