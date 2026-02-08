@@ -3,7 +3,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Send
 
 from gargoyle.graph.mind_map_context import MindMapContext
-from gargoyle.graph.node_identifiers import ID_MERGE_HIERARCHIES
+from gargoyle.graph.node_identifiers import ID_MERGE_HIERARCHIES, ID_BUILD_MIND_MAP
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 from gargoyle.state.keywords_state import RootKeywords
 
@@ -14,7 +14,7 @@ def fan_out_merging_of_keywords(state: AggregatedKeywordsState, runtime: Runtime
     if not state.last_keywords_hierarchies:
         return END
     if len(state.last_keywords_hierarchies) <= app_config.max_root_keywords:
-        return END
+        return ID_BUILD_MIND_MAP
 
     buckets: list[Send] = []
     for hierarchy_idx in range(0, len(state.last_keywords_hierarchies), app_config.squash_root_keywords):

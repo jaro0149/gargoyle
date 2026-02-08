@@ -38,7 +38,8 @@ def main():
         AggregatedKeywordsState(input_texts=[ospf_text_1, ospf_text_2]),
         context=context
     )
-    print(res)
+    res_state = AggregatedKeywordsState.model_validate(res)
+    print(res_state.mind_map_puml)
 
 
 if __name__ == "__main__":

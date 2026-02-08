@@ -29,7 +29,7 @@ class KeywordsMergingConfig(BaseModel):
     """
     Configuration for the keywords merging node.
     """
-    enabled: bool = True
+    enabled: bool = False
     """
     Whether to enable the keywords merging node.
     If disabled, the output of the keywords hierarchy builder node is returned directly.

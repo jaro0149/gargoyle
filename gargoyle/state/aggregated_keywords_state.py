@@ -42,3 +42,7 @@ class AggregatedKeywordsState(BaseModel):
     """
     List of keyword hierarchies from the last iteration of the merging process.
     """
+    mind_map_puml: str | None = None
+    """
+    Built PlantUML representation of the mind map.
+    """
