@@ -12,6 +12,15 @@ def prepare_keywords_before_merging(
         state: AggregatedKeywordsState,
         runtime: Runtime[MindMapContext]
 ) -> AggregatedKeywordsState:
+    """
+    Prepares keywords by potentially randomizing and resetting their hierarchical structures before the merging process.
+
+    :param state: Represents the current state of aggregated keywords including hierarchies
+        and merged keyword information.
+    :param runtime: Provides runtime context and configuration for the keyword merging process.
+    :return: A new AggregatedKeywordsState object with the updated last keyword hierarchies
+        based on the randomization setting and freshly reset merged keywords.
+    """
     app_config = runtime.context.config.merge_keywords
 
     if state.merged_keywords_hierarchies:

@@ -3,6 +3,14 @@ from gargoyle.state.keywords_state import KeywordsHierarchy
 
 
 def build_mind_map(state: AggregatedKeywordsState) -> AggregatedKeywordsState:
+    """
+    Generates a PlantUML mind map representation based on the provided keywords hierarchies from the given state.
+
+    :param state: The current state containing the keywords hierarchies and other
+        related data for building the mind map.
+    :return: A new AggregatedKeywordsState object with an updated `mind_map_puml` containing the generated PlantUML
+        mind map or `None` if no hierarchies exist.
+    """
     keywords_hierarchies = state.last_keywords_hierarchies or state.keyword_hierarchies
     if not keywords_hierarchies:
         return AggregatedKeywordsState(mind_map_puml=None)

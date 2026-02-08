@@ -12,11 +12,33 @@ from gargoyle.state.keywords_state import KeywordsState, RootKeywords, KeywordsH
 
 
 class KeywordsHierarchyBuilder:
+    """
+    Builds a hierarchical structure of keywords based on input models and configurations.
+
+    This class is designed to facilitate the creation of keyword hierarchies by interacting
+    with a BaseChatModel. It leverages structured data outputs defined by the RootKeywords
+    schema. The purpose of this class is to process keywords, generate hierarchical prompts,
+    and enforce structural constraints, ensuring the output conforms to pre-defined rules.
+    """
 
     def __init__(self, model: BaseChatModel) -> None:
+        """
+        Initializes an instance of the class.
+
+        :param model: Instance of the BaseChatModel that is configured for structured output usage.
+        """
         self.struct_model = model.with_structured_output(schema=RootKeywords)
 
     def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
+        """
+        Processes the state and runtime inputs to generate and return structured
+        RootKeywords based on a language model's response and application constraints.
+
+        :param state: The current state containing keywords.
+        :param runtime: Runtime containing relevant context and configurations for execution.
+        :return: A RootKeywords object resulting from processing the input state and
+            applying configuration constraints.
+        """
         if not state.keywords:
             return RootKeywords(keyword_hierarchies=[])
 

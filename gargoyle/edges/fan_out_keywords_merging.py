@@ -9,6 +9,18 @@ from gargoyle.state.keywords_state import RootKeywords
 
 
 def fan_out_merging_of_keywords(state: AggregatedKeywordsState, runtime: Runtime[MindMapContext]) -> list[Send] | str:
+    """
+    Performs a fan-out merging operation on keywords hierarchies by splitting them into manageable chunks.
+
+    If the number of hierarchies is below a certain threshold, it triggers a specific operation instead of chunking.
+
+    :param state: Represents the current state of aggregated keywords. Contains all the necessary hierarchy and states
+        required for processing.
+    :param runtime: Contains runtime execution context, including configurations for merging keywords and associated
+        context information.
+    :return: A list of `Send` objects representing chunks of keyword hierarchies ready for further processing, or a
+        string ID indicating the appropriate action to perform based on the application configuration.
+    """
     app_config = runtime.context.config.merge_keywords
 
     if not state.last_keywords_hierarchies:

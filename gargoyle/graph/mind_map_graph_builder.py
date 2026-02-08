@@ -25,11 +25,32 @@ from gargoyle.state.keywords_state import KeywordsState
 
 
 class MindMapGraphBuilder:
+    """
+    Represents a builder for constructing a mind map creation process using state graphs.
+
+    This class provides functionality to construct and compile modular state graphs that handle
+    keyword extraction and aggregation, ultimately producing a mind map creation flow. The APIs
+    allow for the creation of reusable components using language model-based processing, making
+    it extensible for various text-processing tasks.
+    """
 
     def __init__(self, llm: BaseChatModel) -> None:
+        """
+        Initializes an instance of the class with a given BaseChatModel.
+
+        :param llm: The language model to be used for this instance.
+        """
         self.llm = llm
 
     def build_mind_map_creation_graph(self) -> CompiledStateGraph:
+        """
+        Builds and returns a compiled state graph for mind map creation by combining
+        the keyword extraction graph and an aggregation graph.
+
+        The method creates a modular structure where keywords are first extracted and then aggregated.
+
+        :return: Compiled state graph representing the mind map creation process.
+        """
         key_extraction_graph = self._build_keywords_extraction_graph()
         return self._build_aggregation_graph(
             key_extraction_graph=key_extraction_graph

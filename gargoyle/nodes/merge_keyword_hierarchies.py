@@ -13,14 +13,35 @@ from gargoyle.state.keywords_state import RootKeywords, KeywordsHierarchy
 
 
 class MergeKeywordHierarchies:
+    """
+    Handles the merging of keyword hierarchies based on structured configurations.
 
-    def __init__(
-            self,
-            model: BaseChatModel
-    ) -> None:
+    This class is designed to process and merge keyword hierarchies, using a
+    structured output schema and configurable constraints. It integrates with a
+    language model to generate and enforce the resulting hierarchies.
+    """
+
+    def __init__(self, model: BaseChatModel) -> None:
+        """
+        Initializes an instance with a structured model based on the provided chat model.
+
+        :param model: The base chat model to be configured into a structured model.
+        """
         self.struct_model = model.with_structured_output(schema=MergedKeywordsHierarchies)
 
     def __call__(self, state: RootKeywords, runtime: Runtime[MindMapContext]) -> MergedKeywordsHierarchies:
+        """
+        Executes the callable object to process keyword hierarchies and performs merging
+        of keywords based on provided configurations and input state.
+
+        This method constructs prompt messages, invokes the structured model with
+        specific constraints, and processes the response to generate the resulting
+        merged keyword hierarchies.
+
+        :param state: The root keywords state containing existing keyword hierarchies.
+        :param runtime: The runtime object responsible for providing context and configurations for processing.
+        :return: The result containing merged keyword hierarchies processed using the given configurations.
+        """
         if not state.keyword_hierarchies:
             return MergedKeywordsHierarchies(merged_keywords_hierarchies=[])
 

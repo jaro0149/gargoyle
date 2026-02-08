@@ -6,6 +6,20 @@ from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 
 
 def split_text(state: AggregatedKeywordsState, runtime: Runtime[MindMapContext]) -> AggregatedKeywordsState:
+    """
+    Splits the given text into smaller chunks based on the configuration provided.
+
+    This function takes the current state containing the input text and splits it into
+    smaller chunks according to the text splitter's configuration present in the runtime
+    context. If the text splitter is disabled in the configuration, the function will return
+    the original text as a single chunk. Otherwise, it uses a recursive character splitter
+    to generate the chunks.
+
+    :param state: The current aggregated state, which includes the input text to be split.
+    :param runtime: The runtime environment containing the configuration required for
+        splitting text. The context of the runtime provides access to the configuration.
+    :return: A new state containing the list of text chunks created from the input text.
+    """
     if not state.text:
         return AggregatedKeywordsState(text_chunks=[])
 
