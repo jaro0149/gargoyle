@@ -38,6 +38,10 @@ class KeywordsHierarchyConfig(BaseModel):
     """
     Configuration for the keywords hierarchy builder node.
     """
+    use_single_step: bool = True
+    """
+    Whether to combine keywords extraction and hierarchy building into a single LLM call.
+    """
     max_depth: int = 3
     """
     Maximum depth of the keywords tree hierarchy (including the root keyword).

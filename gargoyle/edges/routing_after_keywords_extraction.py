@@ -13,6 +13,7 @@ def route_after_keywords_extraction(_: AggregatedKeywordsState, runtime: Runtime
     or to proceed directly to building the mind map. It considers the `merge_keywords,enabled` flag in the context
     configuration to make the decision.
 
+    :param _: Unused state of the graph.
     :param runtime: The runtime instance containing the operational context and configuration settings
         for the mind map process.
     :return: The identifier corresponding to the next stage in the workflow. Returns `ID_PREPARE_KEYWORDS_BEFORE_MERGING`

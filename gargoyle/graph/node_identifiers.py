@@ -1,5 +1,6 @@
 ID_SPLIT_TEXT = "split_text"
 ID_EXTRACT_KEYWORDS = "extract_keywords"
+ID_EXTRACT_KEYWORDS_SINGLE_STEP = "extract_keywords_single_step"
 ID_CREATE_HIERARCHY = "create_hierarchy"
 ID_BUILD_KEYWORDS_HIERARCHIES = "build_keywords_hierarchies"
 ID_JOIN_KEYWORDS_HIERARCHIES = "join_keywords_hierarchies"
