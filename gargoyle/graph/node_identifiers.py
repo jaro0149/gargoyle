@@ -1,3 +1,4 @@
+ID_SPLIT_TEXT = "split_text"
 ID_EXTRACT_KEYWORDS = "extract_keywords"
 ID_CREATE_HIERARCHY = "create_hierarchy"
 ID_BUILD_KEYWORDS_HIERARCHIES = "build_keywords_hierarchies"

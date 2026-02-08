@@ -7,6 +7,7 @@ requires-python = "==3.13.5"
 dependencies = [
     "langchain==1.2.7",
     "langchain-openai==1.1.7",
+    "langchain-text-splitters==1.1.0",
 ]
 
 [dependency-groups]
@@ -24,8 +25,8 @@ select = [
     "ALL"
 ]
 ignore = [
-    "D100", # Missing docstring in public module
-    "D104", # Missing docstring in public package
+    "D100", # Missing docstring in a public module
+    "D104", # Missing docstring in a public package
     "D211", # No blank line before class docstring
     "D212", # Multi-line docstring summary not separated with blank line
 ]

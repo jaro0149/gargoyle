@@ -7,7 +7,7 @@ from gargoyle.state.keywords_state import KeywordsState
 
 
 def fan_out_keywords_extraction(state: AggregatedKeywordsState) -> list[Send] | str:
-    if not state.input_texts:
+    if not state.text_chunks:
         return END
 
-    return [Send(ID_BUILD_KEYWORDS_HIERARCHIES, KeywordsState(input_text=text)) for text in state.input_texts]
+    return [Send(ID_BUILD_KEYWORDS_HIERARCHIES, KeywordsState(input_text=text)) for text in state.text_chunks]

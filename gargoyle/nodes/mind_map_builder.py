@@ -12,8 +12,9 @@ def build_mind_map(state: AggregatedKeywordsState) -> AggregatedKeywordsState:
         puml_lines.extend(_build_puml_lines(hierarchy, 1))
     puml_lines.append("@endmindmap")
 
-    state.mind_map_puml = "\n".join(puml_lines)
-    return state
+    return AggregatedKeywordsState(
+        mind_map_puml="\n".join(puml_lines)
+    )
 
 
 def _build_puml_lines(hierarchy: KeywordsHierarchy, depth: int) -> list[str]:

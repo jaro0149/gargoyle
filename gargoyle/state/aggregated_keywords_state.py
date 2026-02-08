@@ -25,9 +25,13 @@ class AggregatedKeywordsState(BaseModel):
     Parent state containing a list of input texts and aggregated results.
     """
 
-    input_texts: list[str] | None = None
+    text: str | None = None
     """
-    A list of texts to process.
+    The original input text to extract keywords from.
+    """
+    text_chunks: list[str] | None = None
+    """
+    A list of text chunks to process.
     """
     keyword_hierarchies: Annotated[list[KeywordsHierarchy], operator.add] = []
     """

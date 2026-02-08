@@ -12,8 +12,9 @@ from gargoyle.graph.node_identifiers import (
     ID_EXTRACT_KEYWORDS,
     ID_JOIN_KEYWORDS_HIERARCHIES,
     ID_MERGE_HIERARCHIES,
-    ID_PREPARE_KEYWORDS_BEFORE_MERGING, ID_BUILD_MIND_MAP,
+    ID_PREPARE_KEYWORDS_BEFORE_MERGING, ID_BUILD_MIND_MAP, ID_SPLIT_TEXT,
 )
+from gargoyle.nodes.input_text_splitter import split_text
 from gargoyle.nodes.keywords_extractor import KeywordsExtractor
 from gargoyle.nodes.keywords_hierarchy_builder import KeywordsHierarchyBuilder
 from gargoyle.nodes.merge_keyword_hierarchies import MergeKeywordHierarchies
@@ -56,14 +57,16 @@ class MindMapGraphBuilder:
         )
 
         graph_builder = StateGraph(AggregatedKeywordsState)
+        graph_builder.add_node(node=ID_SPLIT_TEXT, action=split_text)
         graph_builder.add_node(node=ID_BUILD_KEYWORDS_HIERARCHIES, action=key_extraction_graph)
         graph_builder.add_node(node=ID_JOIN_KEYWORDS_HIERARCHIES, action=lambda state: state)
         graph_builder.add_node(node=ID_PREPARE_KEYWORDS_BEFORE_MERGING, action=prepare_keywords_before_merging)
         graph_builder.add_node(node=ID_MERGE_HIERARCHIES, action=merge_hierarchies)
         graph_builder.add_node(node=ID_BUILD_MIND_MAP, action=build_mind_map)
 
+        graph_builder.add_edge(start_key=START, end_key=ID_SPLIT_TEXT)
         graph_builder.add_conditional_edges(
-            source=START,
+            source=ID_SPLIT_TEXT,
             path=fan_out_keywords_extraction,
             path_map=[ID_BUILD_KEYWORDS_HIERARCHIES, END]
         )

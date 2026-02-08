@@ -17,25 +17,23 @@ def main():
     mind_map_graph_builder = MindMapGraphBuilder(llm)
     graph = mind_map_graph_builder.build_mind_map_creation_graph()
 
-    ospf_text_1 = """
-    Open Shortest Path First (OSPF) is a routing protocol for Internet Protocol (IP) networks. 
-    It uses a link state routing (LSR) algorithm and falls into the group of interior gateway protocols (IGPs), 
+    ospf_text = """
+    Open Shortest Path First (OSPF) is a routing protocol for Internet Protocol (IP) networks.\
+    It uses a link state routing (LSR) algorithm and falls into the group of interior gateway protocols (IGPs),\
     operating within a single autonomous system (AS).
-    """
 
-    ospf_text_2 = """
-    OSPF version 3 introduces modifications to the IPv4 implementation of the protocol.[2] Except for virtual links, 
-    all neighbor exchanges use IPv6 link-local addressing exclusively. The IPv6 protocol runs per link, rather than based 
-    on the subnet. All IP prefix information has been removed from the link-state advertisements and from the hello 
-    discovery packet, making OSPFv3 essentially protocol-independent. Despite the expanded IP addressing to 128 bits
-    in IPv6, area and router Identifications are still based on 32-bit numbers. 
+    OSPF version 3 introduces modifications to the IPv4 implementation of the protocol.[2] Except for virtual links,\
+    all neighbor exchanges use IPv6 link-local addressing exclusively. The IPv6 protocol runs per link, rather than\
+    on the subnet. All IP prefix information has been removed from the link-state advertisements and from the hello\
+    discovery packet, making OSPFv3 essentially protocol-independent. Despite the expanded IP addressing to 128 bits\
+    in IPv6, area and router Identifications are still based on 32-bit numbers.\
     """
 
     context = MindMapContext(
         config=MindMapConfig()
     )
     res = graph.invoke(
-        AggregatedKeywordsState(input_texts=[ospf_text_1, ospf_text_2]),
+        AggregatedKeywordsState(text=ospf_text),
         context=context
     )
     res_state = AggregatedKeywordsState.model_validate(res)

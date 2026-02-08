@@ -1,6 +1,25 @@
 from pydantic import BaseModel
 
 
+class TextSplitterConfig(BaseModel):
+    """
+    Configuration for the text splitter node.
+    """
+    enabled: bool = True
+    """
+    Whether to enable the text splitter node.
+    If disabled, the input text is returned directly and other parameters are ignored.
+    """
+    chunk_size: int = 1000
+    """
+    The maximum number of characters in each chunk.
+    """
+    chunk_overlap: int = 100
+    """
+    The number of characters that overlap between chunks.
+    """
+
+
 class KeywordsExtractorConfig(BaseModel):
     """
     Configuration for the keyword extractor node.
@@ -29,7 +48,7 @@ class KeywordsMergingConfig(BaseModel):
     """
     Configuration for the keywords merging node.
     """
-    enabled: bool = False
+    enabled: bool = True
     """
     Whether to enable the keywords merging node.
     If disabled, the output of the keywords hierarchy builder node is returned directly.
@@ -52,6 +71,10 @@ class KeywordsMergingConfig(BaseModel):
 class MindMapConfig(BaseModel):
     """
     Global configuration for the Gargoyle application.
+    """
+    text_splitter: TextSplitterConfig = TextSplitterConfig()
+    """
+    Configuration for the text splitter node.
     """
     keywords_extractor: KeywordsExtractorConfig = KeywordsExtractorConfig()
     """
