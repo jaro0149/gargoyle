@@ -33,7 +33,7 @@ class MergeKeywordHierarchies:
         """
         self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=MergedKeywordsHierarchies)  # type: ignore[reportUnknownMemberType]
 
-    def __call__(self, state: RootKeywords, runtime: Runtime[MindMapContext]) -> MergedKeywordsHierarchies:
+    async def __call__(self, state: RootKeywords, runtime: Runtime[MindMapContext]) -> MergedKeywordsHierarchies:
         """
         Execute the callable object to process keyword hierarchies and perform merging of keywords.
 
@@ -53,7 +53,7 @@ class MergeKeywordHierarchies:
         app_config = runtime.context.config
         prompt = self._build_prompt(app_config.keywords_hierarchy, app_config.merge_keywords)
         input_message = self._create_input_message(state)
-        llm_response = self.struct_model.invoke(
+        llm_response = await self.struct_model.ainvoke(
             [
                 SystemMessage(content=prompt),
                 HumanMessage(content=input_message),

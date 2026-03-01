@@ -26,7 +26,7 @@ class KeywordsSingleStepBuilder:
         """
         self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)  # type: ignore[reportUnknownMemberType]
 
-    def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
+    async def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
         """
         Process input text to extract and organize keywords into a hierarchy in one step.
 
@@ -42,7 +42,7 @@ class KeywordsSingleStepBuilder:
                               f"(length: {len(state.input_text)} characters).")
         config = runtime.context.config
         prompt = self._build_prompt(config)
-        llm_response = self.struct_model.invoke(
+        llm_response = await self.struct_model.ainvoke(
             input=[
                 SystemMessage(content=prompt),
                 HumanMessage(content=state.input_text),

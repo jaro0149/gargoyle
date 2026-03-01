@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from gargoyle.graph.mind_map_config import MindMapConfig
@@ -8,7 +9,7 @@ from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 logger = logging.getLogger(__name__)
 
 
-def _main() -> None:
+async def _main() -> None:
     logging.basicConfig(level=logging.INFO)
 
     mind_map_graph_builder = MindMapGraphBuilder()
@@ -30,28 +31,26 @@ def _main() -> None:
         config=MindMapConfig(),
     )
 
-    logger.info("--- Starting Mind Map Creation ---\n")
-    for event in graph.stream(
+    logger.info("Starting mind map creation")
+    final_state = None
+    async for _, event_type, event in graph.astream(
             AggregatedKeywordsState(text=ospf_text),
             context=context,
-            stream_mode="custom",
+            stream_mode=["custom", "values"],
             subgraphs=True,
     ):
-        logger.info(event)
+        if event_type == "custom":
+            logger.info("Custom event: %s", event)
+        elif event_type == "values":
+            final_state = event
 
-    # To also get the final result, we might need to invoke or look at the last state-based event
-    # but the requirement is to add an example of streaming.
-    # Usually, we use stream with multiple modes or just collect the final state.
-
-    logger.info("\n--- Finalizing... ---\n")
-    res = graph.invoke(
-        AggregatedKeywordsState(text=ospf_text),
-        context=context,
-    )
-    res_state = AggregatedKeywordsState.model_validate(res)
-    logger.info("--- Resulting PlantUML ---\n")
-    logger.info(res_state.mind_map_puml)
+    if final_state:
+        res_state = AggregatedKeywordsState.model_validate(final_state)
+        logger.info("Resulting PlantUML:")
+        logger.info(res_state.mind_map_puml)
+    else:
+        logger.error("No final state found!")
 
 
 if __name__ == "__main__":
-    _main()
+    asyncio.run(_main())

@@ -33,7 +33,7 @@ class KeywordsHierarchyBuilder:
         """
         self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)  # type: ignore[reportUnknownMemberType]
 
-    def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
+    async def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
         """
         Process the state and runtime inputs to generate and return structured RootKeywords.
 
@@ -53,7 +53,7 @@ class KeywordsHierarchyBuilder:
         runtime.stream_writer(f"Building hierarchy from keywords: {state.keywords}")
         app_config = runtime.context.config.keywords_hierarchy
         prompt = self._build_prompt(app_config)
-        llm_response = self.struct_model.invoke(
+        llm_response = await self.struct_model.ainvoke(
             input=[
                 SystemMessage(content=prompt),
                 HumanMessage(content=str(state.keywords)),

@@ -33,7 +33,7 @@ class KeywordsExtractor:
         """
         self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=Keywords)  # type: ignore[reportUnknownMemberType]
 
-    def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> Keywords:
+    async def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> Keywords:
         """
         Process input text within a given state and runtime to extract and refine keywords.
 
@@ -54,7 +54,7 @@ class KeywordsExtractor:
         runtime.stream_writer(f"Extracting keywords from text (length: {len(state.input_text)} characters).")
         app_config = runtime.context.config.keywords_extractor
         prompt = self._build_prompt(app_config)
-        llm_response = self.struct_model.invoke(
+        llm_response = await self.struct_model.ainvoke(
             input=[
                 SystemMessage(content=prompt),
                 HumanMessage(content=state.input_text),
