@@ -1,10 +1,16 @@
+import logging
+
 from gargoyle.graph.mind_map_config import MindMapConfig
 from gargoyle.graph.mind_map_context import MindMapContext
 from gargoyle.graph.mind_map_graph_builder import MindMapGraphBuilder
 from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 
+logger = logging.getLogger(__name__)
 
-def main():
+
+def _main() -> None:
+    logging.basicConfig(level=logging.INFO)
+
     mind_map_graph_builder = MindMapGraphBuilder()
     graph = mind_map_graph_builder.build_mind_map_creation_graph()
 
@@ -21,15 +27,31 @@ def main():
     """
 
     context = MindMapContext(
-        config=MindMapConfig()
+        config=MindMapConfig(),
     )
+
+    logger.info("--- Starting Mind Map Creation ---\n")
+    for event in graph.stream(
+            AggregatedKeywordsState(text=ospf_text),
+            context=context,
+            stream_mode="custom",
+            subgraphs=True,
+    ):
+        logger.info(event)
+
+    # To also get the final result, we might need to invoke or look at the last state-based event
+    # but the requirement is to add an example of streaming.
+    # Usually, we use stream with multiple modes or just collect the final state.
+
+    logger.info("\n--- Finalizing... ---\n")
     res = graph.invoke(
         AggregatedKeywordsState(text=ospf_text),
-        context=context
+        context=context,
     )
     res_state = AggregatedKeywordsState.model_validate(res)
-    print(res_state.mind_map_puml)
+    logger.info("--- Resulting PlantUML ---\n")
+    logger.info(res_state.mind_map_puml)
 
 
 if __name__ == "__main__":
-    main()
+    _main()

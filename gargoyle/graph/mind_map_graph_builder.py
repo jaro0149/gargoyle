@@ -1,5 +1,4 @@
-from langchain_core.language_models import BaseChatModel
-from langgraph.constants import START, END
+from langgraph.constants import END, START
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
@@ -9,12 +8,14 @@ from gargoyle.edges.route_keywords_extraction import route_keywords_extraction
 from gargoyle.edges.routing_after_keywords_extraction import route_after_keywords_extraction
 from gargoyle.graph.node_identifiers import (
     ID_BUILD_KEYWORDS_HIERARCHIES,
+    ID_BUILD_MIND_MAP,
     ID_CREATE_HIERARCHY,
     ID_EXTRACT_KEYWORDS,
     ID_EXTRACT_KEYWORDS_SINGLE_STEP,
     ID_JOIN_KEYWORDS_HIERARCHIES,
     ID_MERGE_HIERARCHIES,
-    ID_PREPARE_KEYWORDS_BEFORE_MERGING, ID_BUILD_MIND_MAP, ID_SPLIT_TEXT,
+    ID_PREPARE_KEYWORDS_BEFORE_MERGING,
+    ID_SPLIT_TEXT,
 )
 from gargoyle.llm.llm_factory import LLMFactory
 from gargoyle.nodes.input_text_splitter import split_text
@@ -30,8 +31,9 @@ from gargoyle.state.keywords_state import KeywordsState
 
 
 class MindMapGraphBuilder:
+
     """
-    Represents a builder for constructing a mind map creation process using state graphs.
+    A builder for constructing a mind map creation process using state graphs.
 
     This class provides functionality to construct and compile modular state graphs that handle
     keyword extraction and aggregation, ultimately producing a mind map creation flow. The APIs
@@ -40,15 +42,12 @@ class MindMapGraphBuilder:
     """
 
     def __init__(self) -> None:
-        """
-        Initializes an instance of the class.
-        """
+        """Initialize an instance of the class."""
         self.llm_factory = LLMFactory()
 
     def build_mind_map_creation_graph(self) -> CompiledStateGraph:
         """
-        Builds and returns a compiled state graph for mind map creation by combining
-        the keyword extraction graph and an aggregation graph.
+        Build and return a compiled state graph for mind map creation by combining keyword extraction and aggregation.
 
         The method creates a modular structure where keywords are first extracted and then aggregated.
 
@@ -56,19 +55,19 @@ class MindMapGraphBuilder:
         """
         key_extraction_graph = self._build_keywords_extraction_graph()
         return self._build_aggregation_graph(
-            key_extraction_graph=key_extraction_graph
+            key_extraction_graph=key_extraction_graph,
         )
 
 
     def _build_keywords_extraction_graph(self) -> CompiledStateGraph:
         extractor = KeywordsExtractor(
-            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_extractor_id)
+            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_extractor_id),
         )
         hierarchy_builder = KeywordsHierarchyBuilder(
-            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_hierarchy_builder_id)
+            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_hierarchy_builder_id),
         )
         single_step_builder = KeywordsSingleStepBuilder(
-            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_single_step_builder_id)
+            model=self.llm_factory.get_llm(settings.graph_nodes.keywords_single_step_builder_id),
         )
 
         graph_builder = StateGraph(KeywordsState)
@@ -79,7 +78,7 @@ class MindMapGraphBuilder:
         graph_builder.add_conditional_edges(
             source=START,
             path=route_keywords_extraction,
-            path_map=[ID_EXTRACT_KEYWORDS, ID_EXTRACT_KEYWORDS_SINGLE_STEP]
+            path_map=[ID_EXTRACT_KEYWORDS, ID_EXTRACT_KEYWORDS_SINGLE_STEP],
         )
         graph_builder.add_edge(start_key=ID_EXTRACT_KEYWORDS, end_key=ID_CREATE_HIERARCHY)
         graph_builder.add_edge(start_key=ID_CREATE_HIERARCHY, end_key=END)
@@ -88,16 +87,16 @@ class MindMapGraphBuilder:
 
     def _build_aggregation_graph(
             self,
-            key_extraction_graph: CompiledStateGraph
+            key_extraction_graph: CompiledStateGraph,
     ) -> CompiledStateGraph:
         merge_hierarchies = MergeKeywordHierarchies(
-            model=self.llm_factory.get_llm(settings.graph_nodes.merge_keyword_hierarchies_id)
+            model=self.llm_factory.get_llm(settings.graph_nodes.merge_keyword_hierarchies_id),
         )
 
         graph_builder = StateGraph(AggregatedKeywordsState)
         graph_builder.add_node(node=ID_SPLIT_TEXT, action=split_text)
         graph_builder.add_node(node=ID_BUILD_KEYWORDS_HIERARCHIES, action=key_extraction_graph)
-        graph_builder.add_node(node=ID_JOIN_KEYWORDS_HIERARCHIES, action=lambda state: {})
+        graph_builder.add_node(node=ID_JOIN_KEYWORDS_HIERARCHIES, action=lambda _: {})
         graph_builder.add_node(node=ID_PREPARE_KEYWORDS_BEFORE_MERGING, action=prepare_keywords_before_merging)
         graph_builder.add_node(node=ID_MERGE_HIERARCHIES, action=merge_hierarchies)
         graph_builder.add_node(node=ID_BUILD_MIND_MAP, action=build_mind_map)
@@ -106,18 +105,18 @@ class MindMapGraphBuilder:
         graph_builder.add_conditional_edges(
             source=ID_SPLIT_TEXT,
             path=fan_out_keywords_extraction,
-            path_map=[ID_BUILD_KEYWORDS_HIERARCHIES, END]
+            path_map=[ID_BUILD_KEYWORDS_HIERARCHIES, END],
         )
         graph_builder.add_edge(start_key=ID_BUILD_KEYWORDS_HIERARCHIES, end_key=ID_JOIN_KEYWORDS_HIERARCHIES)
         graph_builder.add_conditional_edges(
             source=ID_JOIN_KEYWORDS_HIERARCHIES,
             path=route_after_keywords_extraction,
-            path_map=[ID_PREPARE_KEYWORDS_BEFORE_MERGING, ID_BUILD_MIND_MAP]
+            path_map=[ID_PREPARE_KEYWORDS_BEFORE_MERGING, ID_BUILD_MIND_MAP],
         )
         graph_builder.add_conditional_edges(
             source=ID_PREPARE_KEYWORDS_BEFORE_MERGING,
             path=fan_out_merging_of_keywords,
-            path_map=[ID_MERGE_HIERARCHIES, ID_BUILD_MIND_MAP, END]
+            path_map=[ID_MERGE_HIERARCHIES, ID_BUILD_MIND_MAP, END],
         )
         graph_builder.add_edge(start_key=ID_MERGE_HIERARCHIES, end_key=ID_PREPARE_KEYWORDS_BEFORE_MERGING)
         graph_builder.add_edge(start_key=ID_BUILD_MIND_MAP, end_key=END)

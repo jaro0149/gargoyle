@@ -1,5 +1,5 @@
-from gargoyle.graph.mind_map_config import KeywordsHierarchyConfig, KeywordsExtractorConfig
-from gargoyle.state.keywords_state import KeywordsHierarchy, Keywords
+from gargoyle.graph.mind_map_config import KeywordsExtractorConfig, KeywordsHierarchyConfig
+from gargoyle.state.keywords_state import Keywords, KeywordsHierarchy
 
 
 def enforce_max_depth(config: KeywordsHierarchyConfig, hierarchy: KeywordsHierarchy) -> KeywordsHierarchy:

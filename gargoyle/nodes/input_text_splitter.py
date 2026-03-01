@@ -7,7 +7,7 @@ from gargoyle.state.aggregated_keywords_state import AggregatedKeywordsState
 
 def split_text(state: AggregatedKeywordsState, runtime: Runtime[MindMapContext]) -> AggregatedKeywordsState:
     """
-    Splits the given text into smaller chunks based on the configuration provided.
+    Split the given text into smaller chunks based on the configuration provided.
 
     This function takes the current state containing the input text and splits it into
     smaller chunks according to the text splitter's configuration present in the runtime
@@ -21,18 +21,23 @@ def split_text(state: AggregatedKeywordsState, runtime: Runtime[MindMapContext])
     :return: A new state containing the list of text chunks created from the input text.
     """
     if not state.text:
+        runtime.stream_writer("No input text to split.")
         return AggregatedKeywordsState(text_chunks=[])
 
     splitter_config = runtime.context.config.text_splitter
     if not splitter_config.enabled:
+        runtime.stream_writer("Text splitter is disabled. Using the entire text as a single chunk.")
         return AggregatedKeywordsState(text_chunks=[state.text])
 
+    runtime.stream_writer(f"Splitting text into chunks with size {splitter_config.chunk_size} "
+                          f"and overlap {splitter_config.chunk_overlap} characters.")
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=splitter_config.chunk_size,
         chunk_overlap=splitter_config.chunk_overlap,
     )
 
     chunks = splitter.split_text(state.text)
+    runtime.stream_writer(f"Text split into {len(chunks)} chunks.")
     return AggregatedKeywordsState(
-        text_chunks=chunks
+        text_chunks=chunks,
     )

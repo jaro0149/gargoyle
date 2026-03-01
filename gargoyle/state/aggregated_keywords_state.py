@@ -8,9 +8,8 @@ from gargoyle.state.keywords_state import KeywordsHierarchy
 
 
 class MergedKeywordsHierarchies(BaseModel):
-    """
-    Merged keywords from multiple hierarchies.
-    """
+
+    """Merged keywords from multiple hierarchies."""
 
     merged_keywords_hierarchies: list[KeywordsHierarchy]
     """
@@ -21,9 +20,8 @@ class MergedKeywordsHierarchies(BaseModel):
 
 
 class AggregatedKeywordsState(BaseModel):
-    """
-    Parent state containing a list of input texts and aggregated results.
-    """
+
+    """Parent state containing a list of input texts and aggregated results."""
 
     text: str | None = None
     """

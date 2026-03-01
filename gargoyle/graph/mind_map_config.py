@@ -2,9 +2,9 @@ from pydantic import BaseModel
 
 
 class TextSplitterConfig(BaseModel):
-    """
-    Configuration for the text splitter node.
-    """
+
+    """Configuration for the text splitter node."""
+
     enabled: bool = True
     """
     Whether to enable the text splitter node.
@@ -21,9 +21,9 @@ class TextSplitterConfig(BaseModel):
 
 
 class KeywordsExtractorConfig(BaseModel):
-    """
-    Configuration for the keyword extractor node.
-    """
+
+    """Configuration for the keyword extractor node."""
+
     max_keywords: int = 10
     """
     Maximum number of keywords to extract from the input text.
@@ -35,9 +35,9 @@ class KeywordsExtractorConfig(BaseModel):
 
 
 class KeywordsHierarchyConfig(BaseModel):
-    """
-    Configuration for the keywords hierarchy builder node.
-    """
+
+    """Configuration for the keywords hierarchy builder node."""
+
     use_single_step: bool = True
     """
     Whether to combine keywords extraction and hierarchy building into a single LLM call.
@@ -49,9 +49,9 @@ class KeywordsHierarchyConfig(BaseModel):
 
 
 class KeywordsMergingConfig(BaseModel):
-    """
-    Configuration for the keywords merging node.
-    """
+
+    """Configuration for the keywords merging node."""
+
     enabled: bool = True
     """
     Whether to enable the keywords merging node.
@@ -73,9 +73,9 @@ class KeywordsMergingConfig(BaseModel):
 
 
 class MindMapConfig(BaseModel):
-    """
-    Global configuration for the Gargoyle application.
-    """
+
+    """Global configuration for the Gargoyle application."""
+
     text_splitter: TextSplitterConfig = TextSplitterConfig()
     """
     Configuration for the text splitter node.

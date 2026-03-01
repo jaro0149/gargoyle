@@ -1,11 +1,10 @@
-from pydantic import BaseModel
-from pydantic import ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 
 class Keywords(BaseModel):
-    """
-    Schema for extracting keywords from text.
-    """
+
+    """Schema for extracting keywords from text."""
+
     keywords: list[str] | None = None
     """
     A list of keywords extracted from the text.
@@ -15,9 +14,9 @@ class Keywords(BaseModel):
 
 
 class KeywordsHierarchy(BaseModel):
-    """
-    Schema for representing a keyword and its sub-keywords.
-    """
+
+    """Schema for representing a keyword and its sub-keywords."""
+
     keyword: str
     """
     A keyword extracted from the text.
@@ -48,9 +47,9 @@ class KeywordsHierarchy(BaseModel):
 
 
 class RootKeywords(BaseModel):
-    """
-    Schema for representing root keywords and their hierarchies.
-    """
+
+    """Schema for representing root keywords and their hierarchies."""
+
     keyword_hierarchies: list[KeywordsHierarchy] | None = None
     """
     A list of root keywords with their sub-keywords.
@@ -60,9 +59,9 @@ class RootKeywords(BaseModel):
 
 
 class KeywordsState(Keywords, RootKeywords):
-    """
-    State for extracting keywords from text.
-    """
+
+    """State for extracting keywords from text."""
+
     input_text: str
     """
     The text to extract keywords from.
