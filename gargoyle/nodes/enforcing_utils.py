@@ -28,7 +28,7 @@ def trim_keywords(config: KeywordsExtractorConfig, derived_keywords: Keywords) -
     if not derived_keywords.keywords:
         return derived_keywords
 
-    trimmed_keywords = []
+    trimmed_keywords: list[str] = []
     for kw in derived_keywords.keywords[:config.max_keywords]:
         words = kw.split()
         trimmed_kw = " ".join(words[:config.max_words_in_keyword])

@@ -6,6 +6,7 @@ from gargoyle.edges.fan_out_keywords_extraction import fan_out_keywords_extracti
 from gargoyle.edges.fan_out_keywords_merging import fan_out_merging_of_keywords
 from gargoyle.edges.route_keywords_extraction import route_keywords_extraction
 from gargoyle.edges.routing_after_keywords_extraction import route_after_keywords_extraction
+from gargoyle.graph.mind_map_context import MindMapContext
 from gargoyle.graph.node_identifiers import (
     ID_BUILD_KEYWORDS_HIERARCHIES,
     ID_BUILD_MIND_MAP,
@@ -45,7 +46,9 @@ class MindMapGraphBuilder:
         """Initialize an instance of the class."""
         self.llm_factory = LLMFactory()
 
-    def build_mind_map_creation_graph(self) -> CompiledStateGraph:
+    def build_mind_map_creation_graph(
+            self,
+    ) -> CompiledStateGraph[AggregatedKeywordsState, MindMapContext, AggregatedKeywordsState, AggregatedKeywordsState]:
         """
         Build and return a compiled state graph for mind map creation by combining keyword extraction and aggregation.
 
@@ -59,7 +62,9 @@ class MindMapGraphBuilder:
         )
 
 
-    def _build_keywords_extraction_graph(self) -> CompiledStateGraph:
+    def _build_keywords_extraction_graph(
+            self,
+    ) -> CompiledStateGraph[KeywordsState, MindMapContext, KeywordsState, KeywordsState]:
         extractor = KeywordsExtractor(
             model=self.llm_factory.get_llm(settings.graph_nodes.keywords_extractor_id),
         )
@@ -70,7 +75,7 @@ class MindMapGraphBuilder:
             model=self.llm_factory.get_llm(settings.graph_nodes.keywords_single_step_builder_id),
         )
 
-        graph_builder = StateGraph(KeywordsState)
+        graph_builder = StateGraph(KeywordsState, context_schema=MindMapContext)
         graph_builder.add_node(node=ID_EXTRACT_KEYWORDS, action=extractor)
         graph_builder.add_node(node=ID_CREATE_HIERARCHY, action=hierarchy_builder)
         graph_builder.add_node(node=ID_EXTRACT_KEYWORDS_SINGLE_STEP, action=single_step_builder)
@@ -87,16 +92,18 @@ class MindMapGraphBuilder:
 
     def _build_aggregation_graph(
             self,
-            key_extraction_graph: CompiledStateGraph,
-    ) -> CompiledStateGraph:
+            key_extraction_graph: CompiledStateGraph[KeywordsState, MindMapContext, KeywordsState, KeywordsState],
+    ) -> CompiledStateGraph[AggregatedKeywordsState, MindMapContext, AggregatedKeywordsState, AggregatedKeywordsState]:
         merge_hierarchies = MergeKeywordHierarchies(
             model=self.llm_factory.get_llm(settings.graph_nodes.merge_keyword_hierarchies_id),
         )
+        def join_keywords_hierarchies(state: AggregatedKeywordsState) -> dict:  # noqa: ARG001
+            return {}
 
-        graph_builder = StateGraph(AggregatedKeywordsState)
+        graph_builder = StateGraph(AggregatedKeywordsState, context_schema=MindMapContext)
         graph_builder.add_node(node=ID_SPLIT_TEXT, action=split_text)
         graph_builder.add_node(node=ID_BUILD_KEYWORDS_HIERARCHIES, action=key_extraction_graph)
-        graph_builder.add_node(node=ID_JOIN_KEYWORDS_HIERARCHIES, action=lambda _: {})
+        graph_builder.add_node(node=ID_JOIN_KEYWORDS_HIERARCHIES, action=join_keywords_hierarchies)
         graph_builder.add_node(node=ID_PREPARE_KEYWORDS_BEFORE_MERGING, action=prepare_keywords_before_merging)
         graph_builder.add_node(node=ID_MERGE_HIERARCHIES, action=merge_hierarchies)
         graph_builder.add_node(node=ID_BUILD_MIND_MAP, action=build_mind_map)

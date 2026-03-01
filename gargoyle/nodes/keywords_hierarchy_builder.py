@@ -1,4 +1,4 @@
-from typing import cast
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -9,6 +9,9 @@ from gargoyle.graph.mind_map_context import MindMapContext
 from gargoyle.nodes.enforcing_utils import enforce_max_depth
 from gargoyle.nodes.promt_templates import KEYWORDS_HIERARCHY_CREATION_PROMPT
 from gargoyle.state.keywords_state import KeywordsHierarchy, KeywordsState, RootKeywords
+
+if TYPE_CHECKING:
+    from langchain_core.runnables import Runnable
 
 
 class KeywordsHierarchyBuilder:
@@ -28,7 +31,7 @@ class KeywordsHierarchyBuilder:
 
         :param model: Instance of the BaseChatModel that is configured for structured output usage.
         """
-        self.struct_model = model.with_structured_output(schema=RootKeywords)
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)  # type: ignore[reportUnknownMemberType]
 
     def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
         """
@@ -56,8 +59,10 @@ class KeywordsHierarchyBuilder:
                 HumanMessage(content=str(state.keywords)),
             ],
         )
-        root_keywords = cast("RootKeywords", llm_response)
-        result = self._enforce_constraints(root_keywords, app_config)
+        if not isinstance(llm_response, RootKeywords):
+            msg = f"Expected RootKeywords, got {type(llm_response)}"
+            raise TypeError(msg)
+        result = self._enforce_constraints(llm_response, app_config)
 
         if result.keyword_hierarchies:
             tree_strings = [h.to_string() for h in result.keyword_hierarchies]

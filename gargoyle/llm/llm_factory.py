@@ -1,6 +1,7 @@
 
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
 from gargoyle.settings import settings
 
@@ -20,7 +21,7 @@ class LLMFactory:
         for model_id, model_settings in settings.llm_models.items():
             llm = ChatOpenAI(
                 model=model_settings.model,
-                api_key=model_settings.api_key.get_secret_value(),
+                api_key=SecretStr(model_settings.api_key.get_secret_value()),
                 base_url=model_settings.base_url,
                 streaming=True,
             )

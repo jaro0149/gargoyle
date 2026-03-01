@@ -1,4 +1,4 @@
-from typing import cast
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -9,6 +9,9 @@ from gargoyle.graph.mind_map_context import MindMapContext
 from gargoyle.nodes.enforcing_utils import trim_keywords
 from gargoyle.nodes.promt_templates import KEYWORDS_EXTRACTION_PROMPT
 from gargoyle.state.keywords_state import Keywords, KeywordsState
+
+if TYPE_CHECKING:
+    from langchain_core.runnables import Runnable
 
 
 class KeywordsExtractor:
@@ -28,7 +31,7 @@ class KeywordsExtractor:
         :param model: An instance of BaseChatModel that will be set up to output
             structured data adhering to the schema defined by the Keywords class.
         """
-        self.struct_model = model.with_structured_output(schema=Keywords)
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=Keywords)  # type: ignore[reportUnknownMemberType]
 
     def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> Keywords:
         """
@@ -57,8 +60,11 @@ class KeywordsExtractor:
                 HumanMessage(content=state.input_text),
             ],
         )
-        keywords = cast("Keywords", llm_response)
-        refined_keywords = trim_keywords(config=app_config, derived_keywords=keywords)
+        if not isinstance(llm_response, Keywords):
+            msg = f"Expected Keywords, got {type(llm_response)}"
+            raise TypeError(msg)
+
+        refined_keywords = trim_keywords(config=app_config, derived_keywords=llm_response)
         runtime.stream_writer(f"Extracted keywords: {refined_keywords.keywords}")
         return refined_keywords
 

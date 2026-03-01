@@ -30,6 +30,10 @@ def prepare_keywords_before_merging(
         runtime.stream_writer("Using initial keyword hierarchies for preparation.")
         last_keyword_hierarchies = state.keyword_hierarchies
 
+    if not isinstance(last_keyword_hierarchies, list):
+        msg = f"Expected list[KeywordsHierarchy], got {type(last_keyword_hierarchies)}"
+        raise TypeError(msg)
+
     if app_config.randomize_keywords:
         runtime.stream_writer("Randomizing keyword hierarchies order.")
         last_keyword_hierarchies = _shuffled_copy(last_keyword_hierarchies)

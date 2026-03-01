@@ -8,6 +8,7 @@ dependencies = [
     "langchain==1.2.7",
     "langchain-openai==1.1.7",
     "langchain-text-splitters==1.1.0",
+    "pydantic-settings==2.13.1",
 ]
 
 [dependency-groups]

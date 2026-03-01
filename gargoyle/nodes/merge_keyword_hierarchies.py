@@ -1,4 +1,4 @@
-from typing import cast
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -10,6 +10,9 @@ from gargoyle.nodes.enforcing_utils import enforce_max_depth
 from gargoyle.nodes.promt_templates import COMBINE_HIERARCHIES_PROMPT
 from gargoyle.state.aggregated_keywords_state import MergedKeywordsHierarchies
 from gargoyle.state.keywords_state import RootKeywords
+
+if TYPE_CHECKING:
+    from langchain_core.runnables import Runnable
 
 
 class MergeKeywordHierarchies:
@@ -28,7 +31,7 @@ class MergeKeywordHierarchies:
 
         :param model: The base chat model to be configured into a structured model.
         """
-        self.struct_model = model.with_structured_output(schema=MergedKeywordsHierarchies)
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=MergedKeywordsHierarchies)  # type: ignore[reportUnknownMemberType]
 
     def __call__(self, state: RootKeywords, runtime: Runtime[MindMapContext]) -> MergedKeywordsHierarchies:
         """
@@ -56,9 +59,12 @@ class MergeKeywordHierarchies:
                 HumanMessage(content=input_message),
             ],
         )
-        root_keywords = cast("MergedKeywordsHierarchies", llm_response)
+        if not isinstance(llm_response, MergedKeywordsHierarchies):
+            msg = f"Expected MergedKeywordsHierarchies, got {type(llm_response)}"
+            raise TypeError(msg)
+
         result = self._enforce_constraints(
-            root_keywords=root_keywords,
+            root_keywords=llm_response,
             hierarchy_config=app_config.keywords_hierarchy,
             merge_config=app_config.merge_keywords,
         )
@@ -80,6 +86,8 @@ class MergeKeywordHierarchies:
 
     @staticmethod
     def _create_input_message(state: RootKeywords) -> str:
+        if not state.keyword_hierarchies:
+            return ""
         input_texts = [keyword_hierarchy.to_string() for keyword_hierarchy in state.keyword_hierarchies]
         return "\n\n".join(input_texts)
 

@@ -36,7 +36,7 @@ class KeywordsHierarchy(BaseModel):
         """
         return self._build_tree_string([self], 0)
 
-    def _build_tree_string(self, nodes: list["KeywordsHierarchy"], depth: int) -> str:
+    def _build_tree_string(self, nodes: list["KeywordsHierarchy"] | None, depth: int) -> str:
         if not nodes:
             return ""
         tree_str = ""

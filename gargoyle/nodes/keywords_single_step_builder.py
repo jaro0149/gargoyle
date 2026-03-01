@@ -1,4 +1,4 @@
-from typing import cast
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -9,6 +9,9 @@ from gargoyle.graph.mind_map_context import MindMapContext
 from gargoyle.nodes.enforcing_utils import enforce_max_depth
 from gargoyle.nodes.promt_templates import KEYWORDS_SINGLE_STEP_PROMPT
 from gargoyle.state.keywords_state import KeywordsHierarchy, KeywordsState, RootKeywords
+
+if TYPE_CHECKING:
+    from langchain_core.runnables import Runnable
 
 
 class KeywordsSingleStepBuilder:
@@ -21,7 +24,7 @@ class KeywordsSingleStepBuilder:
 
         :param model: An instance of BaseChatModel.
         """
-        self.struct_model = model.with_structured_output(schema=RootKeywords)
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)  # type: ignore[reportUnknownMemberType]
 
     def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
         """
@@ -45,8 +48,11 @@ class KeywordsSingleStepBuilder:
                 HumanMessage(content=state.input_text),
             ],
         )
-        root_keywords = cast("RootKeywords", llm_response)
-        result = self._enforce_constraints(root_keywords, config)
+        if not isinstance(llm_response, RootKeywords):
+            msg = f"Expected RootKeywords, got {type(llm_response)}"
+            raise TypeError(msg)
+
+        result = self._enforce_constraints(llm_response, config)
 
         if result.keyword_hierarchies:
             tree_strings = [h.to_string() for h in result.keyword_hierarchies]
