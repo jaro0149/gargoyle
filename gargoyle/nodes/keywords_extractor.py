@@ -31,7 +31,7 @@ class KeywordsExtractor:
         :param model: An instance of BaseChatModel that will be set up to output
             structured data adhering to the schema defined by the Keywords class.
         """
-        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=Keywords)  # type: ignore[reportUnknownMemberType]
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=Keywords)
 
     async def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> Keywords:
         """

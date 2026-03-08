@@ -33,7 +33,7 @@ async def _main() -> None:
 
     logger.info("Starting mind map creation")
     final_state = None
-    async for _, event_type, event in graph.astream(
+    async for _, event_type, event in graph.astream(  # pyright: ignore[reportUnknownMemberType]
             AggregatedKeywordsState(text=ospf_text),
             context=context,
             stream_mode=["custom", "values"],

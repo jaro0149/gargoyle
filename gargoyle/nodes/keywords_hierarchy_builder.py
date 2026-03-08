@@ -31,7 +31,7 @@ class KeywordsHierarchyBuilder:
 
         :param model: Instance of the BaseChatModel that is configured for structured output usage.
         """
-        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)  # type: ignore[reportUnknownMemberType]
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)
 
     async def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
         """

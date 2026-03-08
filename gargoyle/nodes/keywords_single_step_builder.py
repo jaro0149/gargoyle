@@ -24,7 +24,7 @@ class KeywordsSingleStepBuilder:
 
         :param model: An instance of BaseChatModel.
         """
-        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)  # type: ignore[reportUnknownMemberType]
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=RootKeywords)
 
     async def __call__(self, state: KeywordsState, runtime: Runtime[MindMapContext]) -> RootKeywords:
         """

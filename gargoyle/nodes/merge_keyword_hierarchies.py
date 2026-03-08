@@ -31,7 +31,7 @@ class MergeKeywordHierarchies:
 
         :param model: The base chat model to be configured into a structured model.
         """
-        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=MergedKeywordsHierarchies)  # type: ignore[reportUnknownMemberType]
+        self.struct_model: Runnable[Any, Any] = model.with_structured_output(schema=MergedKeywordsHierarchies)
 
     async def __call__(self, state: RootKeywords, runtime: Runtime[MindMapContext]) -> MergedKeywordsHierarchies:
         """

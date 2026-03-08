@@ -1,6 +1,8 @@
+from typing import Any, cast
+
 from langgraph.constants import END, START
-from langgraph.graph import StateGraph
-from langgraph.graph.state import CompiledStateGraph
+from langgraph.graph import StateGraph  # pyright: ignore[reportMissingTypeStubs]
+from langgraph.graph.state import CompiledStateGraph  # pyright: ignore[reportMissingTypeStubs]
 
 from gargoyle.edges.fan_out_keywords_extraction import fan_out_keywords_extraction
 from gargoyle.edges.fan_out_keywords_merging import fan_out_merging_of_keywords
@@ -76,9 +78,12 @@ class MindMapGraphBuilder:
         )
 
         graph_builder = StateGraph(KeywordsState, context_schema=MindMapContext)
-        graph_builder.add_node(node=ID_EXTRACT_KEYWORDS, action=extractor)
-        graph_builder.add_node(node=ID_CREATE_HIERARCHY, action=hierarchy_builder)
-        graph_builder.add_node(node=ID_EXTRACT_KEYWORDS_SINGLE_STEP, action=single_step_builder)
+        # Routed add_node(...) and compile() calls through a local Any-typed builder handle to avoid
+        # reportUnknownMemberType noise from langgraph partial typing
+        graph_builder_api: Any = graph_builder
+        graph_builder_api.add_node(node=ID_EXTRACT_KEYWORDS, action=extractor)
+        graph_builder_api.add_node(node=ID_CREATE_HIERARCHY, action=hierarchy_builder)
+        graph_builder_api.add_node(node=ID_EXTRACT_KEYWORDS_SINGLE_STEP, action=single_step_builder)
 
         graph_builder.add_conditional_edges(
             source=START,
@@ -88,7 +93,10 @@ class MindMapGraphBuilder:
         graph_builder.add_edge(start_key=ID_EXTRACT_KEYWORDS, end_key=ID_CREATE_HIERARCHY)
         graph_builder.add_edge(start_key=ID_CREATE_HIERARCHY, end_key=END)
         graph_builder.add_edge(start_key=ID_EXTRACT_KEYWORDS_SINGLE_STEP, end_key=END)
-        return graph_builder.compile()
+        return cast(
+            "CompiledStateGraph[KeywordsState, MindMapContext, KeywordsState, KeywordsState]",
+            graph_builder_api.compile(),
+        )
 
     def _build_aggregation_graph(
             self,
@@ -97,16 +105,19 @@ class MindMapGraphBuilder:
         merge_hierarchies = MergeKeywordHierarchies(
             model=self.llm_factory.get_llm(settings.graph_nodes.merge_keyword_hierarchies_id),
         )
-        def join_keywords_hierarchies(state: AggregatedKeywordsState) -> dict:  # noqa: ARG001
+        def join_keywords_hierarchies(_: AggregatedKeywordsState) -> dict[str, object]:
             return {}
 
         graph_builder = StateGraph(AggregatedKeywordsState, context_schema=MindMapContext)
-        graph_builder.add_node(node=ID_SPLIT_TEXT, action=split_text)
-        graph_builder.add_node(node=ID_BUILD_KEYWORDS_HIERARCHIES, action=key_extraction_graph)
-        graph_builder.add_node(node=ID_JOIN_KEYWORDS_HIERARCHIES, action=join_keywords_hierarchies)
-        graph_builder.add_node(node=ID_PREPARE_KEYWORDS_BEFORE_MERGING, action=prepare_keywords_before_merging)
-        graph_builder.add_node(node=ID_MERGE_HIERARCHIES, action=merge_hierarchies)
-        graph_builder.add_node(node=ID_BUILD_MIND_MAP, action=build_mind_map)
+        # Routed add_node(...) and compile() calls through a local Any-typed builder handle to avoid
+        # reportUnknownMemberType noise from langgraph partial typing
+        graph_builder_api: Any = graph_builder
+        graph_builder_api.add_node(node=ID_SPLIT_TEXT, action=split_text)
+        graph_builder_api.add_node(node=ID_BUILD_KEYWORDS_HIERARCHIES, action=key_extraction_graph)
+        graph_builder_api.add_node(node=ID_JOIN_KEYWORDS_HIERARCHIES, action=join_keywords_hierarchies)
+        graph_builder_api.add_node(node=ID_PREPARE_KEYWORDS_BEFORE_MERGING, action=prepare_keywords_before_merging)
+        graph_builder_api.add_node(node=ID_MERGE_HIERARCHIES, action=merge_hierarchies)
+        graph_builder_api.add_node(node=ID_BUILD_MIND_MAP, action=build_mind_map)
 
         graph_builder.add_edge(start_key=START, end_key=ID_SPLIT_TEXT)
         graph_builder.add_conditional_edges(
@@ -127,4 +138,7 @@ class MindMapGraphBuilder:
         )
         graph_builder.add_edge(start_key=ID_MERGE_HIERARCHIES, end_key=ID_PREPARE_KEYWORDS_BEFORE_MERGING)
         graph_builder.add_edge(start_key=ID_BUILD_MIND_MAP, end_key=END)
-        return graph_builder.compile()
+        return cast(
+            "CompiledStateGraph[AggregatedKeywordsState, MindMapContext, AggregatedKeywordsState, AggregatedKeywordsState]", # noqa: E501
+            graph_builder_api.compile(),
+        )
