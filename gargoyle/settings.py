@@ -40,6 +40,22 @@ class GraphNodesModelSettings(BaseModel):
     )
 
 
+class RestApiSettings(BaseModel):
+
+    """Configuration settings for the REST API."""
+
+    host: str = Field(
+        default="127.0.0.1",
+        description="Host address for the REST API server.",
+    )
+    port: int = Field(
+        default=5000,
+        description="Port number for the REST API server.",
+        ge=1,
+        le=65535,
+    )
+
+
 class Settings(BaseSettings):
 
     """
@@ -56,6 +72,11 @@ class Settings(BaseSettings):
     graph_nodes: GraphNodesModelSettings = Field(
         default_factory=GraphNodesModelSettings,
         description="Model identifiers for different graph nodes.",
+    )
+
+    rest_api: RestApiSettings = Field(
+        default_factory=RestApiSettings,
+        description="Configuration settings for the REST API.",
     )
 
     model_config = SettingsConfigDict(
